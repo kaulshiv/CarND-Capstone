@@ -77,7 +77,7 @@ class DBWNode(object):
         self.loop()
 
     def loop(self):
-        rate = rospy.Rate(30) # 50Hz
+        rate = rospy.Rate(50) # 50Hz
         while not rospy.is_shutdown():
             if not None in (self.current_vel, self.linear_vel, self.angular_vel):
                 self.throttle, self.brake, self.steering = self.controller.control(self.current_vel,
@@ -86,15 +86,10 @@ class DBWNode(object):
                                                                 self.angular_vel)
 
             if self.dbw_enabled:
-                #self.publish(1.0, 0.0, 0.0)
                 self.publish(self.throttle, self.steering, self.brake)
-                rospy.loginfo("throttle val: %f"%self.throttle)
-                rospy.loginfo("steering val: %f"%self.steering)
-                rospy.loginfo("brake val: %f"%self.brake)
             rate.sleep()
 
     def dbw_enabled_cb(self, msg):
-        rospy.loginfo("dw enabled %s"%msg) 
         self.dbw_enabled = msg
     
     def twist_cb(self, msg):

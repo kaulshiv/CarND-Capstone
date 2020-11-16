@@ -70,9 +70,9 @@ class Controller(object):
             decel = max(vel_error, self.decel_limit)
             brake = abs(decel)*self.vehicle_mass*self.wheel_radius # Torque N*m
 
-        rospy.loginfo("throttle: {0}\n".format(throttle))
-        rospy.loginfo("steering: {0}\n".format(steering))
-        rospy.loginfo("brake: {0}\n".format(brake))
+        rospy.loginfo("throttle: {0}".format(throttle))
+        rospy.loginfo("steering: {0}".format(steering))
+        rospy.loginfo("brake: {0}".format(brake))
 
         return throttle, brake, steering
         
