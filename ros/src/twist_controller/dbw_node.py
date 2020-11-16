@@ -33,7 +33,7 @@ that we have created in the `__init__` function.
 
 class DBWNode(object):
     def __init__(self):
-        rospy.init_node('dbw_node', log_level=rospy.DEBUG)
+        rospy.init_node('dbw_node')
 
         vehicle_mass = rospy.get_param('~vehicle_mass', 1736.35)
         fuel_capacity = rospy.get_param('~fuel_capacity', 13.5)
@@ -77,17 +77,8 @@ class DBWNode(object):
         self.loop()
 
     def loop(self):
-        rate = rospy.Rate(50) # 50Hz
+        rate = rospy.Rate(30) # 50Hz
         while not rospy.is_shutdown():
-            # TODO: Get predicted throttle, brake, and steering using `twist_controller`
-            # You should only publish the control commands if dbw is enabled
-            # throttle, brake, steering = self.controller.control(<proposed linear velocity>,
-            #                                                     <proposed angular velocity>,
-            #                                                     <current linear velocity>,
-            #                                                     <dbw status>,
-            #                                                     <any other argument you need>)
-            # if <dbw is enabled>:
-            #   self.publish(throttle, brake, steer)
             if not None in (self.current_vel, self.linear_vel, self.angular_vel):
                 self.throttle, self.brake, self.steering = self.controller.control(self.current_vel,
                                                                 self.dbw_enabled,
@@ -95,10 +86,15 @@ class DBWNode(object):
                                                                 self.angular_vel)
 
             if self.dbw_enabled:
-                self.publish(self.throttle, self.brake, self.steering)
+                #self.publish(1.0, 0.0, 0.0)
+                self.publish(self.throttle, self.steering, self.brake)
+                rospy.loginfo("throttle val: %f"%self.throttle)
+                rospy.loginfo("steering val: %f"%self.steering)
+                rospy.loginfo("brake val: %f"%self.brake)
             rate.sleep()
 
     def dbw_enabled_cb(self, msg):
+        rospy.loginfo("dw enabled %s"%msg) 
         self.dbw_enabled = msg
     
     def twist_cb(self, msg):

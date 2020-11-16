@@ -21,7 +21,7 @@ class Controller(object):
         self.throttle_controller = PID(kp, ki, kd, mn, mx)
 
         tau = 0.5
-        ts = 0.2
+        ts = .02
         self.vel_lpf = LowPassFilter(tau, ts)
 
         self.vehicle_mass = vehicle_mass
@@ -74,6 +74,5 @@ class Controller(object):
         rospy.loginfo("steering: {0}\n".format(steering))
         rospy.loginfo("brake: {0}\n".format(brake))
 
-        return 1., 0., 0.
-        # return throttle, brake, steering
+        return throttle, brake, steering
         
