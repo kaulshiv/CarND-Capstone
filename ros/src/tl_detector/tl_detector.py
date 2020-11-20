@@ -97,7 +97,9 @@ class TLDetector(object):
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
 
-        cv2.imwrite('testimg.png', self.camera_image)
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        time = msg.header.stamp
+        cv2.imwrite(time+'traintestimg.jpeg', cv_image)
 
     def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
