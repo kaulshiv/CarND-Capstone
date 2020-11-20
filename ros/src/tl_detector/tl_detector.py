@@ -78,7 +78,7 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-        rospy.loginfo("IMAGE CB")
+        rospy.loginfo("IMAGE CB 131232")
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
