@@ -5,7 +5,7 @@ from geometry_msgs.msg import PoseStamped, Pose
 from styx_msgs.msg import TrafficLightArray, TrafficLight
 from styx_msgs.msg import Lane
 from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
+from cv_bridge import CvBridge,CvBridgeError
 from light_classification.tl_classifier import TLClassifier
 import tf
 import cv2
@@ -97,9 +97,16 @@ class TLDetector(object):
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
 
-        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-        time = msg.header.stamp
-        cv2.imwrite(time+'traintestimg.jpeg', cv_image)
+        try:
+            # Convert your ROS Image message to OpenCV2
+            cv2_img = bridge.imgmsg_to_cv2(msg, "bgr8")
+        except CvBridgeError, e:
+            ros.loginfo("IMAGE WRITE ERROR" + e)
+        else:
+            # Save your OpenCV2 image as a jpeg 
+            time = msg.header.stamp
+            cv2.imwrite(''+str(time)+'.jpeg', cv2_img)
+
 
     def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
