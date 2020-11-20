@@ -44,6 +44,8 @@ class TLDetector(object):
 
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
+        rospy.loginfo("PUBLISHERSSS" )
+
         self.bridge = CvBridge()
         self.light_classifier = TLClassifier()
         self.listener = tf.TransformListener()
@@ -53,6 +55,7 @@ class TLDetector(object):
         self.last_wp = -1
         self.state_count = 0
 
+        rospy.loginfo("B4 SPIN" )
         rospy.spin()
 
     def pose_cb(self, msg):
