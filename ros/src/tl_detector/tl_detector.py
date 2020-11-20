@@ -109,7 +109,7 @@ class TLDetector(object):
             rospy.loginfo("IMAGE WRITE ERROR" )
         else:
             # Save your OpenCV2 image as a jpeg 
-            ts = msg.header.stamp
+            ts = rospy.get_rostime()
             rospy.loginfo("WRITING IMAGE " + str(ts))
             cv2.imwrite('training_images/'+str(ts)+'.jpeg', cv2_img)
             rospy.loginfo("WROTE IMAGE" )
