@@ -99,13 +99,15 @@ class TLDetector(object):
 
         try:
             # Convert your ROS Image message to OpenCV2
-            cv2_img = bridge.imgmsg_to_cv2(msg, "bgr8")
-        except CvBridgeError, e:
-            ros.loginfo("IMAGE WRITE ERROR" + e)
+            cv2_img = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+        except CvBridgeError:
+            rospy.loginfo("IMAGE WRITE ERROR" )
         else:
             # Save your OpenCV2 image as a jpeg 
             time = msg.header.stamp
+            rospy.loginfo("WRITING IMAGE" )
             cv2.imwrite(''+str(time)+'.jpeg', cv2_img)
+            rospy.loginfo("WROTE IMAGE" )
 
 
     def get_closest_waypoint(self, x, y):
