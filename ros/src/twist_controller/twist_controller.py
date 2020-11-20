@@ -42,12 +42,12 @@ class Controller(object):
             return 0., 0., 0.
 
 
-        rospy.loginfo("Angular vel: {0}".format(angular_vel))
-        rospy.loginfo("Target velocity: {0}".format(linear_vel))
-        rospy.loginfo("Target angular velocity: {0}".format(angular_vel))
-        rospy.loginfo("Current velocity: {0}".format(current_vel))
+        # rospy.loginfo("Angular vel: {0}".format(angular_vel))
+        # rospy.loginfo("Target velocity: {0}".format(linear_vel))
+        # rospy.loginfo("Target angular velocity: {0}".format(angular_vel))
+        # rospy.loginfo("Current velocity: {0}".format(current_vel))
         current_vel = self.vel_lpf.filt(current_vel)
-        rospy.loginfo("Filtered velocity: {0}".format(self.vel_lpf.get()))
+        # rospy.loginfo("Filtered velocity: {0}".format(self.vel_lpf.get()))
 
         steering = self.yaw_controller.get_steering(linear_vel, angular_vel, current_vel)
 
@@ -70,9 +70,9 @@ class Controller(object):
             decel = max(vel_error, self.decel_limit)
             brake = abs(decel)*self.vehicle_mass*self.wheel_radius # Torque N*m
 
-        rospy.loginfo("throttle: {0}".format(throttle))
-        rospy.loginfo("steering: {0}".format(steering))
-        rospy.loginfo("brake: {0}".format(brake))
+        # rospy.loginfo("throttle: {0}".format(throttle))
+        # rospy.loginfo("steering: {0}".format(steering))
+        # rospy.loginfo("brake: {0}".format(brake))
 
         return throttle, brake, steering
         
