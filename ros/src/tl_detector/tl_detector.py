@@ -109,10 +109,11 @@ class TLDetector(object):
             rospy.loginfo("IMAGE WRITE ERROR" )
         else:
             # Save your OpenCV2 image as a jpeg 
-            time = msg.header.stamp
-            rospy.loginfo("WRITING IMAGE" )
-            cv2.imwrite(''+str(time)+'.jpeg', cv2_img)
+            ts = msg.header.stamp
+            rospy.loginfo("WRITING IMAGE " + ts)
+            cv2.imwrite('training_images/'+str(ts)+'.jpeg', cv2_img)
             rospy.loginfo("WROTE IMAGE" )
+            rospy.sleep(1)
 
 
     def get_closest_waypoint(self, x, y):
