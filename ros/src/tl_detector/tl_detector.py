@@ -11,6 +11,7 @@ import tf
 import cv2
 import yaml
 from scipy.spatial import KDTree
+from helpers import detect_light
 
 STATE_COUNT_THRESHOLD = 3
 
@@ -79,7 +80,7 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-        rospy.loginfo("IMAGE CB 131232")
+        rospy.loginfo("IMAGE CB")
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
@@ -111,9 +112,10 @@ class TLDetector(object):
             # Save your OpenCV2 image as a jpeg 
             ts = rospy.get_rostime()
             rospy.loginfo("WRITING IMAGE " + str(ts))
+            cv2_detect_light(cv2_img)
             cv2.imwrite('training_images/'+str(ts)+'.jpeg', cv2_img)
             rospy.loginfo("WROTE IMAGE" )
-            rospy.sleep(1)
+            rospy.sleep(5)
 
 
     def get_closest_waypoint(self, x, y):
