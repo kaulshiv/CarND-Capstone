@@ -67,6 +67,11 @@ class TLDetector(object):
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypoint_tree = KDTree(self.waypoints_2d)
 
+    def flatground_dist(self, idx1, idx2):
+        x1,y1 = self.waypoints_2d[idx1][0], self.waypoints_2d[idx1][1]
+        x2,y2 = self.waypoints_2d[idx2][0], self.waypoints_2d[idx2][1]
+        return ((x1-x2)**2 + (y1-y2)**2)**0.5
+
     def traffic_cb(self, msg):
         self.lights = msg.lights
 
@@ -112,9 +117,10 @@ class TLDetector(object):
             rospy.loginfo("WRITING IMAGE " + str(ts))
             # cv2_img = detect_light(cv2_img)
             image_types = {TrafficLight.UNKNOWN: "nolight", TrafficLight.GREEN: "green", TrafficLight.YELLOW: "yellow", TrafficLight.RED: "red"}
-            image_suffix = image_types[self.get_closest_light_truth()]
+            light_dist, state = self.get_closest_light_truth()
+            image_suffix = image_types[state]
 
-            cv2.imwrite('training_images/'+ str(image_suffix) + '_' + str(ts)+'.jpeg', cv2_img)
+            cv2.imwrite('training_images/'+ str(image_suffix) + '/'+ str(light_dist) + '_' + str(ts) + '.jpeg', cv2_img)
             rospy.loginfo("WROTE IMAGE" )
             rospy.sleep(3)
 
@@ -172,6 +178,7 @@ class TLDetector(object):
     def get_closest_light_truth(self):
         # List of positions that correspond to the line to stop in front of for a given intersection
         closest_light = None
+        closest_dist = -1.0
         stop_line_positions = self.config['stop_line_positions']
         if(self.pose):
             car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
@@ -186,11 +193,12 @@ class TLDetector(object):
                 if d >= 0 and d < diff:
                     diff = d
                     closest_light = light
+                    closest_dist = self.flatground_dist(temp_wp_idx, car_wp_idx)
 
         if closest_light:
-            return closest_light.state
+            return closest_dist, closest_light.state
 
-        return TrafficLight.UNKNOWN
+        return closest_dist, TrafficLight.UNKNOWN
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
