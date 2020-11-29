@@ -122,7 +122,6 @@ class TLDetector(object):
 
             cv2.imwrite('training_images/'+ str(image_suffix) + '/'+ str(light_dist) + '_' + str(ts) + '.jpeg', cv2_img)
             rospy.loginfo("WROTE IMAGE" )
-            rospy.sleep(3)
 
 
     def get_closest_waypoint(self, x, y):
@@ -178,6 +177,7 @@ class TLDetector(object):
     def get_closest_light_truth(self):
         # List of positions that correspond to the line to stop in front of for a given intersection
         closest_light = None
+        line_wp_idx = None
         closest_dist = -1.0
         stop_line_positions = self.config['stop_line_positions']
         if(self.pose):
@@ -194,8 +194,11 @@ class TLDetector(object):
                     diff = d
                     closest_light = light
                     closest_dist = self.flatground_dist(temp_wp_idx, car_wp_idx)
+                    line_wp_idx = temp_wp_idx
 
         if closest_light:
+            rospy.loginfo("Diff: %d", diff)
+            rospy.loginfo("Line wp index: %d", line_wp_idx)
             return closest_dist, closest_light.state
 
         return closest_dist, TrafficLight.UNKNOWN
