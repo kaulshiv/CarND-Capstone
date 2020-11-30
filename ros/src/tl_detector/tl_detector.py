@@ -67,9 +67,9 @@ class TLDetector(object):
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypoint_tree = KDTree(self.waypoints_2d)
 
-    def flatground_dist(self, idx1, idx2):
-        x1,y1 = self.waypoints_2d[idx1][0], self.waypoints_2d[idx1][1]
-        x2,y2 = self.waypoints_2d[idx2][0], self.waypoints_2d[idx2][1]
+    def flatground_dist(self, coord1, coord2):
+        x1,y1 = coord1
+        x2,y2 = coord2
         return ((x1-x2)**2 + (y1-y2)**2)**0.5
 
     def traffic_cb(self, msg):
@@ -193,7 +193,7 @@ class TLDetector(object):
                 if d >= 0 and d < diff:
                     diff = d
                     closest_light = light
-                    closest_dist = self.flatground_dist((line[0], line[1]), car_wp_idx)
+                    closest_dist = self.flatground_dist((line[0], line[1]), (self.waypoints_2d[idx1][0], self.waypoints_2d[idx1][1]))
                     line_wp_idx = temp_wp_idx
 
         if closest_light:
