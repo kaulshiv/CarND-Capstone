@@ -1,5 +1,7 @@
 import numpy as np
 import os
+import os.path
+import glob
 import six.moves.urllib as urllib
 import sys
 import tarfile
@@ -8,9 +10,11 @@ import zipfile
 
 from collections import defaultdict
 from io import StringIO
-from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 from PIL import Image
-# from IPython.display import display
+#from IPython.display import display
 
 from object_detection.utils import ops as utils_ops
 from object_detection.utils import label_map_util
@@ -31,7 +35,7 @@ def load_model(model_name):
     origin=base_url + model_file,
     untar=True)
 
-  model_dir = pathlib.Path(model_dir)/"saved_model"
+  model_dir = os.path.join(model_dir, "saved_model")
 
   model = tf.saved_model.load(str(model_dir))
 
@@ -89,21 +93,24 @@ def show_inference(model, image_path):
       use_normalized_coordinates=True,
       line_thickness=8)
 
-  plt.imshow(Image.fromarray(image_np))
-  plt.title(image_path)
-  plt.show()
-
+  final_img = Image.fromarray(image_np) 
+  final_img.save(os.path.join('outimgs', image_path.split('/')[-1]))
+  return final_img
 
 if __name__=="__main__":
     # List of the strings that is used to add correct label for each box.
     PATH_TO_LABELS = 'models/research/object_detection/data/mscoco_label_map.pbtxt'
     category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
 
-    PATH_TO_TEST_IMAGES_DIR = pathlib.Path('drive/MyDrive/udacity_data/test')
-    TEST_IMAGE_PATHS = list(PATH_TO_TEST_IMAGES_DIR.glob("*.jpeg"))[20:30]
+    ptid = ['training_images/red', 'training_images/green', 'training_images/yellow']
 
     model_name = 'ssd_mobilenet_v1_coco_2017_11_17'
     detection_model = load_model(model_name)
     
-    for image_path in TEST_IMAGE_PATHS:
-        show_inference(detection_model, image_path)
+    for PATH_TO_TEST_IMAGES_DIR in ptid[0]:
+        TEST_IMAGE_PATHS = glob.glob(os.path.join(PATH_TO_TEST_IMAGES_DIR,"*.jpeg"))
+        
+        for image_path in TEST_IMAGE_PATHS[0]:
+            final_img = show_inference(detection_model, image_path)
+            print('image_path >>>>>>>', image_path)
+	
