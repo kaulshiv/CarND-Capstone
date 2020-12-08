@@ -93,9 +93,10 @@ def show_inference(model, image_path):
       use_normalized_coordinates=True,
       line_thickness=8)
 
-  print("det boxes >>>>> ", output_dict['detection_boxes'].shape)
-  print("det classes >>>>> ", output_dict['detection_classes'])
-  print("det scores >>>>> ", output_dict['detection_scores'])
+  for i, classidx in enumerate(output_dict['detection_classes'][0:3]):
+      if classidx==10:
+          print("det boxes >>>>> ", output_dict['boxes'][i, :], ", det score>>>>", output_dict['detection_scores'])      
+
   final_img = Image.fromarray(image_np) 
   final_img.save(os.path.join('outimgs', image_path.split('/')[-1]))
   return final_img
@@ -116,6 +117,4 @@ if __name__=="__main__":
         
         for image_path in TEST_IMAGE_PATHS:
             final_img = show_inference(detection_model, image_path)
-            print('image_path >>>>>>>', image_path)
-            print('det')
-	
+            print('image_path >>>>>>>', image_path)	
