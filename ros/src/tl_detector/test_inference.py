@@ -101,6 +101,7 @@ if __name__=="__main__":
     # List of the strings that is used to add correct label for each box.
     PATH_TO_LABELS = 'models/research/object_detection/data/mscoco_label_map.pbtxt'
     category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
+    print("category index >>>>> ", category_index)
 
     ptid = ['training_images/red', 'training_images/green', 'training_images/yellow']
 
@@ -110,7 +111,11 @@ if __name__=="__main__":
     for PATH_TO_TEST_IMAGES_DIR in ptid[0]:
         TEST_IMAGE_PATHS = glob.glob(os.path.join(PATH_TO_TEST_IMAGES_DIR,"*.jpeg"))
         
-        for image_path in TEST_IMAGE_PATHS[0]:
+        for image_path in TEST_IMAGE_PATHS[0:10]:
             final_img = show_inference(detection_model, image_path)
             print('image_path >>>>>>>', image_path)
+            print('det')
+            print("det boxes >>>>> ", output_dict['detection_boxes'].shape)
+            print("det classes >>>>> ", output_dict['detection_classes'])
+            print("det scores >>>>> ", output_dict['detection_scores'])
 	
