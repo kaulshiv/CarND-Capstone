@@ -115,8 +115,8 @@ if __name__=="__main__":
     model_name = 'ssd_mobilenet_v1_coco_2017_11_17'
     detection_model = load_model(model_name)
 
-    num_lights, num_nolights = 0
-    false_positives, false_negatives = 0
+    num_lights, num_nolights = 0, 0
+    false_positives, false_negatives = 0, 0
 
     for PATH_TO_TEST_IMAGES_DIR in ptid:
         TEST_IMAGE_PATHS = glob.glob(os.path.join(PATH_TO_TEST_IMAGES_DIR,"*.jpeg"))

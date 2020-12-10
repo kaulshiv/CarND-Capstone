@@ -193,7 +193,7 @@ class TLDetector(object):
                 if d >= 0 and d < diff:
                     diff = d
                     closest_light = light
-                    closest_dist = self.flatground_dist((line[0], line[1]), (self.waypoints_2d[idx1][0], self.waypoints_2d[idx1][1]))
+                    closest_dist = self.flatground_dist((line[0], line[1]), (self.waypoints_2d[temp_wp_idx][0], self.waypoints_2d[temp_wp_idx][1]))
                     line_wp_idx = temp_wp_idx
 
         if closest_light:
