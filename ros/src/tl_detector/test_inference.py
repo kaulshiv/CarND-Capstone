@@ -86,16 +86,17 @@ def show_inference(model, light_classification, image_path):
     output_dict = run_inference_for_single_image(model, image_np)
 
     # Visualization of the results of a detection.
-    vis_util.visualize_boxes_and_labels_on_image_array(
-        image_np,
-        output_dict['detection_boxes'],
-        output_dict['detection_classes'],
-        output_dict['detection_scores'],
-        category_index,
-        instance_masks=output_dict.get('detection_masks_reframed', None),
-        use_normalized_coordinates=True,
-        line_thickness=8)
+    #vis_util.visualize_boxes_and_labels_on_image_array(
+    #    image_np,
+    #    output_dict['detection_boxes'],
+    #    output_dict['detection_classes'],
+    #    output_dict['detection_scores'],
+    #    category_index,
+    #    instance_masks=output_dict.get('detection_masks_reframed', None),
+    #    use_normalized_coordinates=True,
+    #    line_thickness=8)
 
+    final_img = None
     light_detected = False
     light_prediction = None
     for i, classidx in enumerate(output_dict['detection_classes'][0:3]):
@@ -106,13 +107,14 @@ def show_inference(model, light_classification, image_path):
             break
 
     if light_detected:
-        cropped_image = get_crop(image, bbox)
-        light_prediction = classify_light(cropped_image)
-        cropped_image.save(os.path.join('predictions', light_classification + "_" + light_prediction , image_path.split('/')[-1]))
+        cropped_gray = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2GRAY)
+        light_prediction = classify_light(cropped_gray)
+        
+        final_img = Image.fromarray(cropped_gray) 
+        final_img.save(os.path.join('predictions', light_classification + "_" + light_prediction + "_" +  image_path.split('/')[-1]))
 
 
 
-    final_img = Image.fromarray(image_np) 
 #   final_img.save(os.path.join('outimgs', light_classification, image_path.split('/')[-1]))
     return final_img, light_detected, light_prediction
 
@@ -123,18 +125,22 @@ def get_crop(image, bbox):
     print("height: " + str(h))
     print("width: " + str(w))
     bot, left, top, right = bbox
-    bot += int(bot*h)
-    top += int(top*h)
-    left += int(left*w)
-    right += int(right*w)
-    return image[ left:right , bot:top, :]
+    bot = int(bot*h)
+    top = int(top*h)
+    left = int(left*w)
+    right = int(right*w)
+    print("bot: ", bot)   
+    print("top: ", top)   
+    print("left: ", left)   
+    print("right: ", right)   
+    return image[ bot:top, left:right, :]
 
 def classify_light(image):
-    h, w, _ = image.shape
-    upperhalf = np.sum(image[:int(h/2), :, :])
-    lowerhalf = np.sum(image[int(h/2):, :, :])
+    h, w  = image.shape
+    upperhalf = np.sum(image[:int(h/2), :])
+    lowerhalf = np.sum(image[int(h/2):, :])
 
-    if(upperhalf>lowerhalf):
+    if(upperhalf<lowerhalf):
         return "green"
     return "red"
 
