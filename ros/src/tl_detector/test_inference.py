@@ -99,7 +99,7 @@ def show_inference(model, light_classification, image_path):
     final_img = None
     light_detected = False
     light_prediction = None
-    for i, classidx in enumerate(output_dict['detection_classes'][0:3]):
+    for i, classidx in enumerate(output_dict['detection_classes']):
         if classidx==10:
         #   print("det boxes >>>>> ", output_dict['boxes'][i, :], ", det score>>>>", output_dict['detection_scores']) 
             light_detected = True
@@ -108,9 +108,9 @@ def show_inference(model, light_classification, image_path):
 
     if light_detected:
         cropped_gray = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2GRAY)
-        light_prediction = classify_light(cropped_img, image_path)
+        light_prediction = classify_light(cropped_img, image_path, light_classification)
         
-        final_img = Image.fromarray(cropped_gray) 
+        final_img = Image.fromarray(cropped_img) 
         final_img.save(os.path.join('predictions', light_classification + "_" + light_prediction + "_" +  image_path.split('/')[-1]))
 
 
@@ -129,19 +129,9 @@ def get_crop(image_path, bbox):
     right = int(right*w)
     return image[ bot:top, left:right, :]
 
-def classify_light(image, image_path):
+def classify_light(image, image_path, light_classification):
     img_hsv=cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-    # # lower mask (0-10)
-    # lower_red = np.array([0,70,50])
-    # upper_red = np.array([10,255,255])
-    # maskr0 = cv2.inRange(img_hsv, lower_red, upper_red)
-
-    # # upper mask (170-180)
-    # lower_red = np.array([170,70,50])
-    # upper_red = np.array([180,255,255])
-    # maskr1 = cv2.inRange(img_hsv, lower_red, upper_red)
-
+    img_rgb=cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     mask1 = cv2.inRange(img_hsv, (0,50,20), (5,255,255))
     mask2 = cv2.inRange(img_hsv, (175,50,20), (180,255,255))
 
@@ -157,13 +147,15 @@ def classify_light(image, image_path):
     num_red_pixels = np.sum(red_mask)
     num_green_pixels = np.sum(green_mask)
 
-    final_img = Image.fromarray(target_red) 
-    final_img.save(os.path.join( 'redmask',  str(num_red_pixels)+'_'+image_path.split('/')[-1]))
-    final_img2 = Image.fromarray(target_green) 
-    final_img2.save(os.path.join( 'greenmask',  str(num_green_pixels)+'_'+image_path.split('/')[-1]))
-
-    if(num_red_pixels<num_green_pixels):
+    if(num_red_pixels<num_green_pixels and num_green_pixels>image.size*0.2):
+        if(light_classification!="green"):
+            final_img = Image.fromarray(img_rgb) 
+            final_img.save(os.path.join('falsegreen', image_path.split('/')[-1]))
         return "green"
+
+    if(light_classification!="red"):
+        final_img = Image.fromarray(img_rgb) 
+        final_img.save(os.path.join('falsered',  image_path.split('/')[-1]))
     return "red"
 
 if __name__=="__main__":
@@ -172,7 +164,7 @@ if __name__=="__main__":
     category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
     #print("category index >>>>> ", category_index)
 
-    ptid = ['tflights/red', 'tflights/green', 'tflights/yellow', 'tflights/nolight']
+    ptid = ['tflights/red', 'tflights/green', 'tflights/nolight']
 
     model_name = 'ssd_mobilenet_v1_coco_2017_11_17'
     detection_model = load_model(model_name)
@@ -182,6 +174,7 @@ if __name__=="__main__":
 
     correct_reds, correct_greens = 0, 0
     num_reds, num_greens = 0, 0
+    total_samples = 0
 
     for PATH_TO_TEST_IMAGES_DIR in ptid:
         TEST_IMAGE_PATHS = glob.glob(os.path.join(PATH_TO_TEST_IMAGES_DIR,"*.jpeg"))
@@ -191,16 +184,21 @@ if __name__=="__main__":
             t0 = time.time()
             final_img, light_detected, prediction = show_inference(detection_model, light_ground_truth, image_path)
             inf_time = time.time()-t0
-
-            if light_ground_truth=="red":
-                if prediction == light_ground_truth:
-                    correct_reds += 1
-                num_reds +=1
-            elif light_ground_truth=="green":
-                if prediction == light_ground_truth:
-                    correct_greens += 1
-                num_greens +=1
-
+            
+            if light_detected and light_ground_truth!="nolight":
+                if light_ground_truth=="red":
+                    if prediction == light_ground_truth:
+                        correct_reds += 1
+                    num_reds +=1
+                elif light_ground_truth=="green":
+                    if prediction == light_ground_truth:
+                        correct_greens += 1
+                    num_greens +=1
+            elif light_detected and light_ground_truth=="nolight":
+                false_positives += 1
+            elif not light_detected and light_ground_truth!="nolight":
+                false_negatives += 1
+            total_samples +=1
 
             # if light_ground_truth=="nolight":
             #     if light_detected:
@@ -220,3 +218,6 @@ if __name__=="__main__":
     # print('num nolights >>>>>>>', num_nolights)
     print("correctly predicted reds: " + str(correct_reds) + "/" + str(num_reds))
     print("correctly predicted greens: " + str(correct_greens) + "/" + str(num_greens))
+    print("false negs: " + str(false_negatives)) 
+    print("false pos: " + str(false_positives)) 
+    print("total samples: " + str(total_samples))
