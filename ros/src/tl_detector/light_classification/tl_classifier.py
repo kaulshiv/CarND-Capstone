@@ -28,17 +28,15 @@ class TLClassifier(object):
 
     def load_model(self):
         base_url = 'http://download.tensorflow.org/models/object_detection/'
-        model_file = model_name + '.tar.gz'
+        model_file = self.model_name + '.tar.gz'
         model_dir = tf.keras.utils.get_file(
-            fname=model_name, 
+            fname=self.model_name, 
             origin=base_url + model_file,
             untar=True)
 
         model_dir = os.path.join(model_dir, "saved_model")
-
         self.model = tf.saved_model.load(str(model_dir))
 
-  return model
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
 
@@ -136,7 +134,6 @@ class TLClassifier(object):
         self.light_prediction = TrafficLight.RED
 
     def get_crop(self, bbox):
-        image = cv2.imread(self.input_image)
         h, w, _ = self.input_image.shape
         bot, left, top, right = bbox
         bot = int(bot*h)

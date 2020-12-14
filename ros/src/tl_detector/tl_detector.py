@@ -24,7 +24,7 @@ class TLDetector(object):
         self.waypoints = None
         self.camera_image = None
         self.lights = []
-
+        self.light_classifier = TLClassifier('ssd_mobilenet_v1_coco_2017_11_17')
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
         self.base_waypoints = None
@@ -47,7 +47,6 @@ class TLDetector(object):
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
-        self.light_classifier = TLClassifier('ssd_mobilenet_v1_coco_2017_11_17')
         self.listener = tf.TransformListener()
 
         self.state = TrafficLight.UNKNOWN
@@ -115,12 +114,8 @@ class TLDetector(object):
             # Save your OpenCV2 image as a jpeg 
             ts = rospy.get_rostime()
             rospy.loginfo("WRITING IMAGE " + str(ts))
-            # cv2_img = detect_light(cv2_img)
             image_types = {TrafficLight.UNKNOWN: "nolight", TrafficLight.GREEN: "green", TrafficLight.YELLOW: "yellow", TrafficLight.RED: "red"}
             light_dist, state = self.get_closest_light_truth()
-            image_suffix = image_types[state]
-
-            cv2.imwrite('training_images/'+ str(image_suffix) + '/'+ str(light_dist) + '_' + str(ts) + '.jpeg', cv2_img)
             rospy.loginfo("WROTE IMAGE" )
 
 
@@ -180,7 +175,7 @@ class TLDetector(object):
         line_wp_idx = None
         closest_dist = -1.0
         stop_line_positions = self.config['stop_line_positions']
-        if(self.pose):
+        if(self.pose and self.base_waypoints and self.waypoint_tree):
             car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
             #TODO find the closest visible traffic light (if one exists)    
@@ -217,7 +212,7 @@ class TLDetector(object):
 
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
-        if(self.pose):
+        if(self.pose and self.base_waypoints and self.waypoint_tree):
             car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
             #TODO find the closest visible traffic light (if one exists)    
@@ -234,6 +229,8 @@ class TLDetector(object):
 
         if closest_light:
             state = self.get_light_state(light)
+            statedict = { TrafficLight.UNKNOWN:"UNKNOWN", TrafficLight.RED: "RED", TrafficLight.GREEN:"GREEN"}
+            rospy.loginfo("LIGHT STATE: " + str(statedict[state]))
             return line_wp_idx, state
 
         return -1, TrafficLight.UNKNOWN
@@ -249,10 +246,9 @@ class TLDetector(object):
         # if light:
         #     state = self.get_light_state(light)
         #     return light_wp, state
-        # self.waypoints = None
-        # return -1, TrafficLight.UNKNOWN
+        # self.waypoints = None # return -1, TrafficLight.UNKNOWN if __name__ == '__main__': try:
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         TLDetector()
     except rospy.ROSInterruptException:
