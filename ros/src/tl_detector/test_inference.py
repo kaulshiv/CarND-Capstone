@@ -14,7 +14,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from PIL import Image
-#from IPython.display import display
+import time
 
 from object_detection.utils import ops as utils_ops
 from object_detection.utils import label_map_util
@@ -76,12 +76,13 @@ def run_inference_for_single_image(model, image):
     
   return output_dict
 
-def show_inference(model, image_path):
+def show_inference(model, light_classification, image_path):
   # the array based representation of the image will be used later in order to prepare the
   # result image with boxes and labels on it.
   image_np = np.array(Image.open(image_path))
   # Actual detection.
   output_dict = run_inference_for_single_image(model, image_np)
+
   # Visualization of the results of a detection.
   vis_util.visualize_boxes_and_labels_on_image_array(
       image_np,
@@ -93,13 +94,15 @@ def show_inference(model, image_path):
       use_normalized_coordinates=True,
       line_thickness=8)
 
+  light_detected = False
   for i, classidx in enumerate(output_dict['detection_classes'][0:3]):
       if classidx==10:
-          print("det boxes >>>>> ", output_dict['boxes'][i, :], ", det score>>>>", output_dict['detection_scores'])      
+        #   print("det boxes >>>>> ", output_dict['boxes'][i, :], ", det score>>>>", output_dict['detection_scores']) 
+          light_detected = True     
 
   final_img = Image.fromarray(image_np) 
-  final_img.save(os.path.join('outimgs', image_path.split('/')[-1]))
-  return final_img
+#   final_img.save(os.path.join('outimgs', light_classification, image_path.split('/')[-1]))
+  return final_img, light_detected
 
 if __name__=="__main__":
     # List of the strings that is used to add correct label for each box.
@@ -107,14 +110,36 @@ if __name__=="__main__":
     category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
     #print("category index >>>>> ", category_index)
 
-    ptid = ['training_images/red', 'training_images/green', 'training_images/yellow']
+    ptid = ['tflights/red', 'tflights/green', 'tflights/yellow', 'tflights/nolight']
 
     model_name = 'ssd_mobilenet_v1_coco_2017_11_17'
     detection_model = load_model(model_name)
-    
+
+    num_lights, num_nolights = 0
+    false_positives, false_negatives = 0
+
     for PATH_TO_TEST_IMAGES_DIR in ptid:
         TEST_IMAGE_PATHS = glob.glob(os.path.join(PATH_TO_TEST_IMAGES_DIR,"*.jpeg"))
+        light_ground_truth = PATH_TO_TEST_IMAGES_DIR.split('/')[-1]
         
         for image_path in TEST_IMAGE_PATHS:
-            final_img = show_inference(detection_model, image_path)
-            print('image_path >>>>>>>', image_path)	
+            t0 = time.time()
+            final_img, light_detected = show_inference(detection_model, light_ground_truth, image_path)
+            inf_time = time.time()-t0
+
+            if light_ground_truth=="nolight":
+                if light_detected:
+                    false_positives += 1
+                num_nolights += 1
+            else:
+                if not light_detected:
+                    false_negatives += 1
+                num_lights += 1
+            
+
+            print('image_path >>>>>>>', image_path, ", inf time: ", inf_time)
+
+    print('false positives >>>>>>>', false_positives)
+    print('num lights >>>>>>>', num_lights)
+    print('false negatives >>>>>>>', false_negatives)
+    print('num nolights >>>>>>>', num_nolights)
