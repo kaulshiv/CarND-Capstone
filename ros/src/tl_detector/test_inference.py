@@ -122,7 +122,7 @@ def get_crop(image, bbox):
     h, w, _ = image.shape
     print("height: " + str(h))
     print("width: " + str(w))
-    bot, left, top, right = box
+    bot, left, top, right = bbox
     bot += int(bot*h)
     top += int(top*h)
     left += int(left*w)
