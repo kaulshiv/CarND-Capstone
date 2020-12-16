@@ -79,31 +79,31 @@ def run_inference_for_single_image(model, image):
   return output_dict
 
 def show_inference(model, light_classification, image_path):
-  # the array based representation of the image will be used later in order to prepare the
-  # result image with boxes and labels on it.
-  image_np = np.array(Image.open(image_path))
-  # Actual detection.
-  output_dict = run_inference_for_single_image(model, image_np)
+    # the array based representation of the image will be used later in order to prepare the
+    # result image with boxes and labels on it.
+    image_np = np.array(Image.open(image_path))
+    # Actual detection.
+    output_dict = run_inference_for_single_image(model, image_np)
 
-  # Visualization of the results of a detection.
-  vis_util.visualize_boxes_and_labels_on_image_array(
-      image_np,
-      output_dict['detection_boxes'],
-      output_dict['detection_classes'],
-      output_dict['detection_scores'],
-      category_index,
-      instance_masks=output_dict.get('detection_masks_reframed', None),
-      use_normalized_coordinates=True,
-      line_thickness=8)
+    # Visualization of the results of a detection.
+    vis_util.visualize_boxes_and_labels_on_image_array(
+        image_np,
+        output_dict['detection_boxes'],
+        output_dict['detection_classes'],
+        output_dict['detection_scores'],
+        category_index,
+        instance_masks=output_dict.get('detection_masks_reframed', None),
+        use_normalized_coordinates=True,
+        line_thickness=8)
 
-  light_detected = False
-  light_prediction = None
-  for i, classidx in enumerate(output_dict['detection_classes'][0:3]):
-      if classidx==10:
+    light_detected = False
+    light_prediction = None
+    for i, classidx in enumerate(output_dict['detection_classes'][0:3]):
+        if classidx==10:
         #   print("det boxes >>>>> ", output_dict['boxes'][i, :], ", det score>>>>", output_dict['detection_scores']) 
-          light_detected = True
-          cropped_img = get_crop(image_np, output_dict['boxes'][i, :])
-          break
+            light_detected = True
+            cropped_img = get_crop(image_np, output_dict['boxes'][i, :])
+            break
 
     if light_detected:
         cropped_image = get_crop(image, bbox)
@@ -112,9 +112,9 @@ def show_inference(model, light_classification, image_path):
 
 
 
-  final_img = Image.fromarray(image_np) 
+    final_img = Image.fromarray(image_np) 
 #   final_img.save(os.path.join('outimgs', light_classification, image_path.split('/')[-1]))
-  return final_img, light_detected, light_prediction
+    return final_img, light_detected, light_prediction
 
 
 
