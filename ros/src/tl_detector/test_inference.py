@@ -7,6 +7,7 @@ import sys
 import tarfile
 import tensorflow as tf
 import zipfile
+import cv2
 
 from collections import defaultdict
 from io import StringIO
@@ -19,6 +20,7 @@ import time
 from object_detection.utils import ops as utils_ops
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
+
 
 # patch tf1 into `utils.ops`
 utils_ops.tf = tf.compat.v1
@@ -95,14 +97,46 @@ def show_inference(model, light_classification, image_path):
       line_thickness=8)
 
   light_detected = False
+  light_prediction = None
   for i, classidx in enumerate(output_dict['detection_classes'][0:3]):
       if classidx==10:
         #   print("det boxes >>>>> ", output_dict['boxes'][i, :], ", det score>>>>", output_dict['detection_scores']) 
-          light_detected = True     
+          light_detected = True
+          cropped_img = get_crop(image_np, output_dict['boxes'][i, :])
+          break
+
+    if light_detected:
+        cropped_image = get_crop(image, bbox)
+        light_prediction = classify_light(cropped_image)
+        cropped_image.save(os.path.join('predictions', light_classification + "_" + light_prediction , image_path.split('/')[-1]))
+
+
 
   final_img = Image.fromarray(image_np) 
 #   final_img.save(os.path.join('outimgs', light_classification, image_path.split('/')[-1]))
-  return final_img, light_detected
+  return final_img, light_detected, light_prediction
+
+
+
+def get_crop(image, bbox):
+    h, w, _ = image.shape
+    print("height: " + str(h))
+    print("width: " + str(w))
+    bot, left, top, right = box
+    bot += int(bot*h)
+    top += int(top*h)
+    left += int(left*w)
+    right += int(right*w)
+    return image[ left:right , bot:top, :]
+
+def classify_light(image):
+    h, w, _ = image.shape
+    upperhalf = np.sum(image[:int(h/2), :, :])
+    lowerhalf = np.sum(image[int(h/2):, :, :])
+
+    if(upperhalf>lowerhalf):
+        return "green"
+    return "red"
 
 if __name__=="__main__":
     # List of the strings that is used to add correct label for each box.
@@ -118,28 +152,43 @@ if __name__=="__main__":
     num_lights, num_nolights = 0, 0
     false_positives, false_negatives = 0, 0
 
+    correct_reds, correct_greens = 0, 0
+    num_reds, num_greens = 0, 0
+
     for PATH_TO_TEST_IMAGES_DIR in ptid:
         TEST_IMAGE_PATHS = glob.glob(os.path.join(PATH_TO_TEST_IMAGES_DIR,"*.jpeg"))
         light_ground_truth = PATH_TO_TEST_IMAGES_DIR.split('/')[-1]
         
         for image_path in TEST_IMAGE_PATHS:
             t0 = time.time()
-            final_img, light_detected = show_inference(detection_model, light_ground_truth, image_path)
+            final_img, light_detected, prediction = show_inference(detection_model, light_ground_truth, image_path)
             inf_time = time.time()-t0
 
-            if light_ground_truth=="nolight":
-                if light_detected:
-                    false_positives += 1
-                num_nolights += 1
-            else:
-                if not light_detected:
-                    false_negatives += 1
-                num_lights += 1
+            if light_ground_truth=="red":
+                if prediction == light_ground_truth:
+                    correct_reds += 1
+                num_reds +=1
+            elif light_ground_truth=="green":
+                if prediction == light_ground_truth:
+                    correct_greens += 1
+                num_greens +=1
+
+
+            # if light_ground_truth=="nolight":
+            #     if light_detected:
+            #         false_positives += 1
+            #     num_nolights += 1
+            # else:
+            #     if not light_detected:
+            #         false_negatives += 1
+            #     num_lights += 1
             
 
-            print('image_path >>>>>>>', image_path, ", inf time: ", inf_time)
+            # print('image_path >>>>>>>', image_path, ", inf time: ", inf_time)
 
-    print('false positives >>>>>>>', false_positives)
-    print('num lights >>>>>>>', num_lights)
-    print('false negatives >>>>>>>', false_negatives)
-    print('num nolights >>>>>>>', num_nolights)
+    # print('false positives >>>>>>>', false_positives)
+    # print('num lights >>>>>>>', num_lights)
+    # print('false negatives >>>>>>>', false_negatives)
+    # print('num nolights >>>>>>>', num_nolights)
+    print("correctly predicted reds: " + str(correct_reds) + "/" + str(num_reds))
+    print("correctly predicted greens: " + str(correct_greens) + "/" + str(num_greens))
