@@ -143,7 +143,7 @@ def classify_light(image, image_path):
     maskr1 = cv2.inRange(img_hsv, lower_red, upper_red)
 
     ## mask of green (36,0,0) ~ (70, 255,255)
-    green_mask = cv2.inRange(hsv, (36, 0, 0), (70, 255,255))
+    green_mask = cv2.inRange(img_hsv, (36, 0, 0), (70, 255,255))
 
     # join my masks
     red_mask = cv2.bitwise_or(maskr0,maskr1)
