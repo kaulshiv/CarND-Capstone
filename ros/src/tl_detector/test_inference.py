@@ -108,7 +108,7 @@ def show_inference(model, light_classification, image_path):
 
     if light_detected:
         cropped_gray = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2GRAY)
-        light_prediction = classify_light(cropped_gray)
+        light_prediction = classify_light(cropped_gray, image_path)
         
         final_img = Image.fromarray(cropped_gray) 
         final_img.save(os.path.join('predictions', light_classification + "_" + light_prediction + "_" +  image_path.split('/')[-1]))
@@ -122,25 +122,42 @@ def show_inference(model, light_classification, image_path):
 
 def get_crop(image, bbox):
     h, w, _ = image.shape
-    print("height: " + str(h))
-    print("width: " + str(w))
     bot, left, top, right = bbox
     bot = int(bot*h)
     top = int(top*h)
     left = int(left*w)
     right = int(right*w)
-    print("bot: ", bot)   
-    print("top: ", top)   
-    print("left: ", left)   
-    print("right: ", right)   
     return image[ bot:top, left:right, :]
 
-def classify_light(image):
-    h, w  = image.shape
-    upperhalf = np.sum(image[:int(h/2), :])
-    lowerhalf = np.sum(image[int(h/2):, :])
+def classify_light(image, image_path):
+    img_hsv=cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    if(upperhalf<lowerhalf):
+    # lower mask (0-10)
+    lower_red = np.array([0,50,50])
+    upper_red = np.array([10,255,255])
+    maskr0 = cv2.inRange(img_hsv, lower_red, upper_red)
+
+    # upper mask (170-180)
+    lower_red = np.array([170,50,50])
+    upper_red = np.array([180,255,255])
+    maskr1 = cv2.inRange(img_hsv, lower_red, upper_red)
+
+    ## mask of green (36,0,0) ~ (70, 255,255)
+    green_mask = cv2.inRange(hsv, (36, 0, 0), (70, 255,255))
+
+    # join my masks
+    red_mask = cv2.bitwise_or(maskr0,maskr1)
+    num_red_pixels = np.sum(red_mask)
+    num_green_pixels = np.sum(green_mask)
+    target_red = cv2.bitwise_and(img, img, mask=red_mask)
+    target_green = cv2.bitwise_and(img, img, mask=green_mask)
+
+    final_img = Image.fromarray(target_red) 
+    final_img.save(os.path.join( 'redmask',  image_path.split('/')[-1]))
+    final_img = Image.fromarray(target_green) 
+    final_img.save(os.path.join( 'greenmask',  image_path.split('/')[-1]))
+
+    if(num_red_pixels<num_green_pixels):
         return "green"
     return "red"
 
@@ -165,7 +182,7 @@ if __name__=="__main__":
         TEST_IMAGE_PATHS = glob.glob(os.path.join(PATH_TO_TEST_IMAGES_DIR,"*.jpeg"))
         light_ground_truth = PATH_TO_TEST_IMAGES_DIR.split('/')[-1]
         
-        for image_path in TEST_IMAGE_PATHS:
+        for image_path in TEST_IMAGE_PATHS[0:5]:
             t0 = time.time()
             final_img, light_detected, prediction = show_inference(detection_model, light_ground_truth, image_path)
             inf_time = time.time()-t0
