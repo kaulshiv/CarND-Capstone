@@ -149,8 +149,8 @@ def classify_light(image, image_path):
     red_mask = cv2.bitwise_or(maskr0,maskr1)
     num_red_pixels = np.sum(red_mask)
     num_green_pixels = np.sum(green_mask)
-    target_red = cv2.bitwise_and(img, img, mask=red_mask)
-    target_green = cv2.bitwise_and(img, img, mask=green_mask)
+    target_red = cv2.bitwise_and(image, image, mask=red_mask)
+    target_green = cv2.bitwise_and(image, image, mask=green_mask)
 
     final_img = Image.fromarray(target_red) 
     final_img.save(os.path.join( 'redmask',  image_path.split('/')[-1]))
