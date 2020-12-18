@@ -133,12 +133,12 @@ def classify_light(image, image_path):
     img_hsv=cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     # lower mask (0-10)
-    lower_red = np.array([0,50,50])
+    lower_red = np.array([0,70,50])
     upper_red = np.array([10,255,255])
     maskr0 = cv2.inRange(img_hsv, lower_red, upper_red)
 
     # upper mask (170-180)
-    lower_red = np.array([170,50,50])
+    lower_red = np.array([170,70,50])
     upper_red = np.array([180,255,255])
     maskr1 = cv2.inRange(img_hsv, lower_red, upper_red)
 
@@ -153,9 +153,9 @@ def classify_light(image, image_path):
     target_green = cv2.bitwise_and(image, image, mask=green_mask)
 
     final_img = Image.fromarray(target_red) 
-    final_img.save(os.path.join( 'redmask',  image_path.split('/')[-1]))
+    final_img.save(os.path.join( 'redmask',  str(num_red_pixels)+'_'+image_path.split('/')[-1]))
     final_img = Image.fromarray(target_green) 
-    final_img.save(os.path.join( 'greenmask',  image_path.split('/')[-1]))
+    final_img.save(os.path.join( 'greenmask',  str(num_green_pixels)+'_'+image_path.split('/')[-1]))
 
     if(num_red_pixels<num_green_pixels):
         return "green"
