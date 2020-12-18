@@ -132,21 +132,27 @@ def get_crop(image, bbox):
 def classify_light(image, image_path):
     img_hsv=cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # lower mask (0-10)
-    lower_red = np.array([0,70,50])
-    upper_red = np.array([10,255,255])
-    maskr0 = cv2.inRange(img_hsv, lower_red, upper_red)
+    # # lower mask (0-10)
+    # lower_red = np.array([0,70,50])
+    # upper_red = np.array([10,255,255])
+    # maskr0 = cv2.inRange(img_hsv, lower_red, upper_red)
 
-    # upper mask (170-180)
-    lower_red = np.array([170,70,50])
-    upper_red = np.array([180,255,255])
-    maskr1 = cv2.inRange(img_hsv, lower_red, upper_red)
+    # # upper mask (170-180)
+    # lower_red = np.array([170,70,50])
+    # upper_red = np.array([180,255,255])
+    # maskr1 = cv2.inRange(img_hsv, lower_red, upper_red)
+
+    mask1 = cv2.inRange(img_hsv, (0,50,20), (5,255,255))
+    mask2 = cv2.inRange(img_hsv, (175,50,20), (180,255,255))
+
+    ## Merge the mask and crop the red regions
+    mask = cv2.bitwise_or(mask1, mask2 )
+    red_mask = cv2.bitwise_and(img, img, mask=mask)
 
     ## mask of green (36,0,0) ~ (70, 255,255)
     green_mask = cv2.inRange(img_hsv, (36, 0, 0), (70, 255,255))
 
     # join my masks
-    red_mask = cv2.bitwise_or(maskr0,maskr1)
     num_red_pixels = np.sum(red_mask)
     num_green_pixels = np.sum(green_mask)
     target_red = cv2.bitwise_and(image, image, mask=red_mask)
@@ -154,8 +160,8 @@ def classify_light(image, image_path):
 
     final_img = Image.fromarray(target_red) 
     final_img.save(os.path.join( 'redmask',  str(num_red_pixels)+'_'+image_path.split('/')[-1]))
-    final_img = Image.fromarray(target_green) 
-    final_img.save(os.path.join( 'greenmask',  str(num_green_pixels)+'_'+image_path.split('/')[-1]))
+    final_img2 = Image.fromarray(target_green) 
+    final_img2.save(os.path.join( 'greenmask',  str(num_green_pixels)+'_'+image_path.split('/')[-1]))
 
     if(num_red_pixels<num_green_pixels):
         return "green"
