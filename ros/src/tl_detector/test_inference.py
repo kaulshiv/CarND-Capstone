@@ -108,7 +108,7 @@ def show_inference(model, light_classification, image_path):
 
     if light_detected:
         cropped_gray = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2GRAY)
-        light_prediction = classify_light(cropped_gray, image_path)
+        light_prediction = classify_light(cropped_img, image_path)
         
         final_img = Image.fromarray(cropped_gray) 
         final_img.save(os.path.join('predictions', light_classification + "_" + light_prediction + "_" +  image_path.split('/')[-1]))
@@ -182,7 +182,7 @@ if __name__=="__main__":
         TEST_IMAGE_PATHS = glob.glob(os.path.join(PATH_TO_TEST_IMAGES_DIR,"*.jpeg"))
         light_ground_truth = PATH_TO_TEST_IMAGES_DIR.split('/')[-1]
         
-        for image_path in TEST_IMAGE_PATHS[0:5]:
+        for image_path in TEST_IMAGE_PATHS:
             t0 = time.time()
             final_img, light_detected, prediction = show_inference(detection_model, light_ground_truth, image_path)
             inf_time = time.time()-t0
