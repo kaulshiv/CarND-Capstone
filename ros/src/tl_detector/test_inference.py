@@ -146,17 +146,16 @@ def classify_light(image, image_path):
     mask2 = cv2.inRange(img_hsv, (175,50,20), (180,255,255))
 
     ## Merge the mask and crop the red regions
-    mask = cv2.bitwise_or(mask1, mask2 )
-    red_mask = cv2.bitwise_and(img, img, mask=mask)
+    red_mask = cv2.bitwise_or(mask1, mask2 )
+    target_red = cv2.bitwise_and(image, image, mask=red_mask)
 
     ## mask of green (36,0,0) ~ (70, 255,255)
     green_mask = cv2.inRange(img_hsv, (36, 0, 0), (70, 255,255))
+    target_green = cv2.bitwise_and(image, image, mask=green_mask)
 
     # join my masks
     num_red_pixels = np.sum(red_mask)
     num_green_pixels = np.sum(green_mask)
-    target_red = cv2.bitwise_and(image, image, mask=red_mask)
-    target_green = cv2.bitwise_and(image, image, mask=green_mask)
 
     final_img = Image.fromarray(target_red) 
     final_img.save(os.path.join( 'redmask',  str(num_red_pixels)+'_'+image_path.split('/')[-1]))
