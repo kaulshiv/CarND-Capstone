@@ -103,7 +103,7 @@ def show_inference(model, light_classification, image_path):
         if classidx==10:
         #   print("det boxes >>>>> ", output_dict['boxes'][i, :], ", det score>>>>", output_dict['detection_scores']) 
             light_detected = True
-            cropped_img = get_crop(image_np, output_dict['detection_boxes'][i, :])
+            cropped_img = get_crop(image_path, output_dict['detection_boxes'][i, :])
             break
 
     if light_detected:
@@ -114,13 +114,13 @@ def show_inference(model, light_classification, image_path):
         final_img.save(os.path.join('predictions', light_classification + "_" + light_prediction + "_" +  image_path.split('/')[-1]))
 
 
-
 #   final_img.save(os.path.join('outimgs', light_classification, image_path.split('/')[-1]))
     return final_img, light_detected, light_prediction
 
 
 
-def get_crop(image, bbox):
+def get_crop(image_path, bbox):
+    image = cv2.imread(image_path)
     h, w, _ = image.shape
     bot, left, top, right = bbox
     bot = int(bot*h)
