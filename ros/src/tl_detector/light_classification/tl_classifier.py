@@ -2,6 +2,10 @@ from styx_msgs.msg import TrafficLight
 import tensorflow as tf
 import numpy as np
 import cv2
+import six.moves.urllib as urllib
+import sys
+import tarfile
+import os
 
 from object_detection.utils import ops as utils_ops
 
@@ -20,11 +24,21 @@ class TLClassifier(object):
         self.input_image = None
         self.light_prediction = None
 
-        self.load(model)
+        self.load_model()
 
     def load_model(self):
-        self.model = tf.saved_model.load(str(self.model_name))
+        base_url = 'http://download.tensorflow.org/models/object_detection/'
+        model_file = model_name + '.tar.gz'
+        model_dir = tf.keras.utils.get_file(
+            fname=model_name, 
+            origin=base_url + model_file,
+            untar=True)
 
+        model_dir = os.path.join(model_dir, "saved_model")
+
+        self.model = tf.saved_model.load(str(model_dir))
+
+  return model
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
 
