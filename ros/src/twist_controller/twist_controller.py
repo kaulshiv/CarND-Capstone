@@ -42,10 +42,10 @@ class Controller(object):
             return 0., 0., 0.
 
 
-        # rospy.loginfo("Angular vel: {0}".format(angular_vel))
-        # rospy.loginfo("Target velocity: {0}".format(linear_vel))
-        # rospy.loginfo("Target angular velocity: {0}".format(angular_vel))
-        # rospy.loginfo("Current velocity: {0}".format(current_vel))
+        rospy.loginfo("Angular vel: {0}".format(angular_vel))
+        rospy.loginfo("Target velocity: {0}".format(linear_vel))
+        rospy.loginfo("Target angular velocity: {0}".format(angular_vel))
+        rospy.loginfo("Current velocity: {0}".format(current_vel))
         current_vel = self.vel_lpf.filt(current_vel)
         # rospy.loginfo("Filtered velocity: {0}".format(self.vel_lpf.get()))
 
@@ -63,7 +63,7 @@ class Controller(object):
 
         if linear_vel == 0. and current_vel < 0.1:
             throttle = 0
-            brake = 400 #N*m - to hold the car in place if we are stopped at a light. Acceleration ~ 1m/s^2
+            brake = 1000 #N*m - to hold the car in place if we are stopped at a light. Acceleration ~ 1m/s^2
         
         elif throttle < .1 and vel_error < 0:
             throttle = 0
