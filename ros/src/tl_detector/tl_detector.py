@@ -93,8 +93,8 @@ class TLDetector(object):
         '''
 
         statedict = {TrafficLight.UNKNOWN:"UNKNOWN", TrafficLight.RED: "RED", TrafficLight.GREEN:"GREEN", TrafficLight.YELLOW:"YELLOW"}
-        rospy.loginfo("LIGHT STATE: " + str(statedict[state]))
-        rospy.loginfo("LIGHT WP: " + str(light_wp))
+        # rospy.loginfo("LIGHT STATE: " + str(statedict[state]))
+        # rospy.loginfo("LIGHT WP: " + str(light_wp))
         if self.state != state:
             self.state_count = 0
             self.state = state
@@ -102,10 +102,10 @@ class TLDetector(object):
             self.last_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
-            rospy.loginfo("state count exceeds threshold: " + str(light_wp))
+            # rospy.loginfo("state count exceeds threshold: " + str(light_wp))
             self.upcoming_red_light_pub.publish(Int32(light_wp))
         else:
-            rospy.loginfo("else: " + str(self.last_wp))
+            # rospy.loginfo("else: " + str(self.last_wp))
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
 
