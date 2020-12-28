@@ -189,34 +189,30 @@ class TLDetector(object):
 
             #TODO find the closest visible traffic light (if one exists)    
             diff = len(self.waypoints.waypoints)
+            min_dist = 80
             for i, light in enumerate(self.lights):
                 # Get stop line waypoint index
                 line = stop_line_positions[i]
-                temp_wp_idx = self.get_closest_waypoint(line[0], line[1])
-                d = temp_wp_idx - car_wp_idx
-                if d >= 0 and d < diff:
-                    diff = d
+                light_wp_idx = self.get_closest_waypoint(line[0], line[1])
+                dist = self.distance(self.waypoints.waypoints[car_wp_idx].pose.pose.position.x, 
+                                        self.waypoints.waypoints[car_wp_idx].pose.pose.position.y, 
+                                        self.waypoints.waypoints[light_wp_idx].pose.pose.position.x, 
+                                        self.waypoints.waypoints[light_wp_idx].pose.pose.position.y)
+
+                if dist < min_dist and light_wp_idx < car_wp_idx:
+                    min_dist = dist
                     closest_light = light
-                    line_wp_idx = temp_wp_idx
+                    line_wp_idx = light_wp_idx
 
         if closest_light:
             state = self.get_light_state(light)
             return line_wp_idx, state
 
         return -1, TrafficLight.UNKNOWN
-        # light = None
 
-        # # List of positions that correspond to the line to stop in front of for a given intersection
-        # stop_line_positions = self.config['stop_line_positions']
-        # if(self.pose):
-        #     car_position = self.get_closest_waypoint(self.pose.pose)
-
-        # #TODO find the closest visible traffic light (if one exists)
-
-        # if light:
-        #     state = self.get_light_state(light)
-        #     return light_wp, state
-        # self.waypoints = None # return -1, TrafficLight.UNKNOWN
+    
+    def distance(self, x1, y1, x2, y2):
+        return ((x1-x2)**2 + (y1-y2)**2)**0.5
 
 if __name__ == "__main__":
     try:
