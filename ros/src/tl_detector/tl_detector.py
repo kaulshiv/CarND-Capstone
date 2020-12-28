@@ -189,7 +189,7 @@ class TLDetector(object):
 
             #TODO find the closest visible traffic light (if one exists)    
             diff = len(self.waypoints.waypoints)
-            min_dist = 80
+            min_dist = float("inf")
             for i, light in enumerate(self.lights):
                 # Get stop line waypoint index
                 line = stop_line_positions[i]
@@ -203,6 +203,9 @@ class TLDetector(object):
                     min_dist = dist
                     closest_light = light
                     line_wp_idx = light_wp_idx
+            
+            if min_dist<float("inf"):
+                rospy.loginfo("MIN DIST >>>: " +   str(min_dist))
 
         if closest_light:
             state = self.get_light_state(light)
