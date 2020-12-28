@@ -89,7 +89,7 @@ class WaypointUpdater(object):
             lane.waypoints = base_waypoints
         else:
             lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_idx)
-            rospy.loginfo("Decelerating >>>>> stopline wp: " + str(self.stopline_wp_idx) + ", farthest idx: " + str(farthest_idx)
+            rospy.loginfo("Decelerating >>>>> stopline wp: " + str(self.stopline_wp_idx) + ", farthest idx: " + str(farthest_idx))
 
         return lane
 

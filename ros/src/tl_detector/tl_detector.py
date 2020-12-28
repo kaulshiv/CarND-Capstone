@@ -199,7 +199,7 @@ class TLDetector(object):
                                         self.waypoints.waypoints[light_wp_idx].pose.pose.position.x, 
                                         self.waypoints.waypoints[light_wp_idx].pose.pose.position.y)
 
-                if dist < min_dist and light_wp_idx < car_wp_idx:
+                if dist < min_dist and light_wp_idx > car_wp_idx:
                     min_dist = dist
                     closest_light = light
                     line_wp_idx = light_wp_idx
