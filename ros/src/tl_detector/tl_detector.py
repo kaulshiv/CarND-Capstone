@@ -130,8 +130,6 @@ class TLDetector(object):
             int: index of the closest waypoint in self.waypoints
 
         """
-        x = self.pose.pose.position.x
-        y = self.pose.pose.position.y
         closest_idx = self.waypoint_tree.query([x, y], 1)[1]
 
         # Check if closest is ahead or behind vehicle
@@ -213,7 +211,6 @@ class TLDetector(object):
 
         return -1, TrafficLight.UNKNOWN
 
-    
     def distance(self, x1, y1, x2, y2):
         return ((x1-x2)**2 + (y1-y2)**2)**0.5
 
