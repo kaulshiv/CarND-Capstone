@@ -104,6 +104,11 @@ class TLDetector(object):
             self.last_wp = light_wp
             # rospy.loginfo("state count exceeds threshold: " + str(light_wp))
             self.upcoming_red_light_pub.publish(Int32(light_wp))
+            if state == TrafficLight.RED:
+                rospy.loginfo("RED LIGHT DETECTED")
+            else:
+                rospy.loginfo("GREEN LIGHT DETECTED")
+
         else:
             # rospy.loginfo("else: " + str(self.last_wp))
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
@@ -201,9 +206,6 @@ class TLDetector(object):
                     min_dist = dist
                     closest_light = light
                     line_wp_idx = light_wp_idx
-            
-            if min_dist<float("inf"):
-                rospy.loginfo("MIN DIST >>>: " +   str(min_dist))
 
         if closest_light:
             state = self.get_light_state(light)

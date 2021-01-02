@@ -2,19 +2,18 @@ from styx_msgs.msg import TrafficLight
 import tensorflow as tf
 import numpy as np
 import cv2
-import six.moves.urllib as urllib
 import sys
 import tarfile
 import os
 
-from object_detection.utils import ops as utils_ops
+# from object_detection.utils import ops as utils_ops
 
 
 # patch tf1 into `utils.ops`
-utils_ops.tf = tf.compat.v1
+# utils_ops.tf = tf.compat.v1
 
 # Patch the location of gfile
-tf.gfile = tf.io.gfile
+# tf.gfile = tf.io.gfile
 
 class TLClassifier(object):
     def __init__(self, model_name):
@@ -36,6 +35,7 @@ class TLClassifier(object):
 
         model_dir = os.path.join(model_dir, "saved_model")
         self.model = tf.saved_model.load(str(model_dir))
+        rospy.loginfo("LOADED MODEL")
 
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
@@ -99,15 +99,15 @@ class TLClassifier(object):
         # detection_classes should be ints.
         output_dict['detection_classes'] = output_dict['detection_classes'].astype(np.int64)
         
-        # Handle models with masks:
-        if 'detection_masks' in output_dict:
-            # Reframe the the bbox mask to the image size.
-            detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(
-                    output_dict['detection_masks'], output_dict['detection_boxes'],
-                    image.shape[0], image.shape[1])      
-            detection_masks_reframed = tf.cast(detection_masks_reframed > 0.5,
-                                            tf.uint8)
-            output_dict['detection_masks_reframed'] = detection_masks_reframed.numpy()
+        # # Handle models with masks:
+        # if 'detection_masks' in output_dict:
+        #     # Reframe the the bbox mask to the image size.
+        #     detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(
+        #             output_dict['detection_masks'], output_dict['detection_boxes'],
+        #             image.shape[0], image.shape[1])      
+        #     detection_masks_reframed = tf.cast(detection_masks_reframed > 0.5,
+        #                                     tf.uint8)
+        #     output_dict['detection_masks_reframed'] = detection_masks_reframed.numpy()
             
         return output_dict
 
