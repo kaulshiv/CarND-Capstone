@@ -135,6 +135,8 @@ class TLClassifier(object):
         else:
             self.light_prediction = TrafficLight.RED
 
+        final_img = Image.fromarray(img_rgb)
+        final_img.save(str(self.light_prediction)+ "_r" +str(num_red_pixels) + "_g" + str(num_green_pixels) +".jpeg")  
         self.counter+=1
 
     def get_crop(self, bbox):
