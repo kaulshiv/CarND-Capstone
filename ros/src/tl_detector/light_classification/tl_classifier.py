@@ -120,24 +120,29 @@ class TLClassifier(object):
 
         ## Merge the mask and crop the red regions
         red_mask = cv2.bitwise_or(mask1, mask2)
-        target_red = cv2.bitwise_and(cropped_img, cropped_img, mask=red_mask)
+        target_red = cv2.bitwise_and(img_rgb, img_rgb, mask=red_mask)
+        target_red = cv2.cvtColor(target_red, cv2.COLOR_RGB2GRAY)
 
         ## mask of green (36,0,0) ~ (70, 255,255)
         green_mask = cv2.inRange(img_hsv, (36, 0, 0), (70, 255,255))
-        target_green = cv2.bitwise_and(cropped_img, cropped_img, mask=green_mask)
+        target_green = cv2.bitwise_and(img_rgb, img_rgb, mask=green_mask)
+        target_green = cv2.cvtColor(target_green, cv2.COLOR_RGB2GRAY)
 
-        # join my masks
-        num_red_pixels = np.sum(red_mask)
-        num_green_pixels = np.sum(green_mask)
+        num_red_pixels = np.sum(target_red)
+        num_green_pixels = np.sum(target_green)
 
-        if(num_red_pixels<num_green_pixels and num_green_pixels>cropped_img.size*0.2):
+        if(num_red_pixels<num_green_pixels and num_green_pixels>2*num_red_pixels):
             self.light_prediction = TrafficLight.GREEN
         else:
             self.light_prediction = TrafficLight.RED
 
-        final_img = Image.fromarray(img_rgb)
-        final_img.save(str(self.light_prediction)+ "_r" +str(num_red_pixels) + "_g" + str(num_green_pixels) +".jpeg")  
-        self.counter+=1
+#        final_img = Image.fromarray(img_rgb)
+#        final_img.save(str(self.light_prediction)+ "_r" +str(num_red_pixels) + "_g" + str(num_green_pixels) +".jpeg")  
+#        green_stuff = Image.fromarray(target_green)
+#        green_stuff.save(str(self.light_prediction)+ "_r" +str(num_red_pixels) + "_g" + str(num_green_pixels) +"_green.jpeg")       
+#        red_stuff = Image.fromarray(target_red)
+#        red_stuff.save(str(self.light_prediction)+ "_r" +str(num_red_pixels) + "_g" + str(num_green_pixels) +"_red.jpeg")       
+#        self.counter+=1
 
     def get_crop(self, bbox):
         h, w, _ = self.input_image.shape
