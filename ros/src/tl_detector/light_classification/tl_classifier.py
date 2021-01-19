@@ -73,7 +73,7 @@ class TLClassifier(object):
 
         if light_detected:
             cropped_gray = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2GRAY)
-            light_prediction = self.classify_light()
+            light_prediction = self.classify_light(cropped_img)
             return True
             
         return False
@@ -112,25 +112,25 @@ class TLClassifier(object):
             
         return output_dict
 
-    def classify_light(self):
-        img_hsv=cv2.cvtColor(self.input_image, cv2.COLOR_BGR2HSV)
-        img_rgb=cv2.cvtColor(self.input_image, cv2.COLOR_BGR2RGB)
+    def classify_light(self, cropped_img):
+        img_hsv=cv2.cvtColor(cropped_img, cv2.COLOR_BGR2HSV)
+        img_rgb=cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
         mask1 = cv2.inRange(img_hsv, (0,50,20), (5,255,255))
         mask2 = cv2.inRange(img_hsv, (175,50,20), (180,255,255))
 
         ## Merge the mask and crop the red regions
         red_mask = cv2.bitwise_or(mask1, mask2)
-        target_red = cv2.bitwise_and(self.input_image, self.input_image, mask=red_mask)
+        target_red = cv2.bitwise_and(cropped_img, cropped_img, mask=red_mask)
 
         ## mask of green (36,0,0) ~ (70, 255,255)
         green_mask = cv2.inRange(img_hsv, (36, 0, 0), (70, 255,255))
-        target_green = cv2.bitwise_and(self.input_image, self.input_image, mask=green_mask)
+        target_green = cv2.bitwise_and(cropped_img, cropped_img, mask=green_mask)
 
         # join my masks
         num_red_pixels = np.sum(red_mask)
         num_green_pixels = np.sum(green_mask)
 
-        if(num_red_pixels<num_green_pixels and num_green_pixels>self.input_image.size*0.2):
+        if(num_red_pixels<num_green_pixels and num_green_pixels>scropped_img.size*0.2):
             self.light_prediction = TrafficLight.GREEN
         self.light_prediction = TrafficLight.RED
 
