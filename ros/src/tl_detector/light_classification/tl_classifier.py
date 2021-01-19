@@ -130,12 +130,12 @@ class TLClassifier(object):
         num_red_pixels = np.sum(red_mask)
         num_green_pixels = np.sum(green_mask)
 
-        if(num_red_pixels<num_green_pixels and num_green_pixels>scropped_img.size*0.2):
+        if(num_red_pixels<num_green_pixels and num_green_pixels>cropped_img.size*0.2):
             self.light_prediction = TrafficLight.GREEN
         self.light_prediction = TrafficLight.RED
 
         final_img = Image.fromarray(img_rgb)
-        final_img.save(str(self.light_prediction)+"_" + str(self.counter))
+        final_img.save(str(self.light_prediction)+"_" + str(self.counter)+'.jpeg')
         self.counter+=1
 
     def get_crop(self, bbox):
