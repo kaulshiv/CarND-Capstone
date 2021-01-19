@@ -73,7 +73,7 @@ class TLClassifier(object):
 
         if light_detected:
             cropped_gray = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2GRAY)
-            light_prediction = self.classify_light(cropped_img)
+            self.classify_light(cropped_img)
             return True
             
         return False
@@ -130,13 +130,15 @@ class TLClassifier(object):
         num_red_pixels = np.sum(red_mask)
         num_green_pixels = np.sum(green_mask)
 
-        if(num_red_pixels<num_green_pixels):# and num_green_pixels>cropped_img.size*0.2):
+        if(num_red_pixels<num_green_pixels and num_green_pixels>cropped_img.size*0.2):
             self.light_prediction = TrafficLight.GREEN
-        self.light_prediction = TrafficLight.RED
+        else:
+            self.light_prediction = TrafficLight.RED
 
         final_img = Image.fromarray(img_rgb)
         final_img.save(str(self.light_prediction)+"_r" + str(num_red_pixels) + "_g" + str(num_green_pixels) + "_"+ str(self.counter)+'.jpeg')
         self.counter+=1
+        return self.light_prediction
 
     def get_crop(self, bbox):
         h, w, _ = self.input_image.shape
