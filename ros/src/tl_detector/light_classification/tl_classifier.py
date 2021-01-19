@@ -66,7 +66,7 @@ class TLClassifier(object):
         light_detected = False
         light_prediction = None
         for i, classidx in enumerate(output_dict['detection_classes']):
-            if classidx==10 and output_dict['detection_scores'][i]>0.2:
+            if classidx==10:
                 light_detected = True
                 cropped_img = self.get_crop(output_dict['detection_boxes'][i, :])
                 break
