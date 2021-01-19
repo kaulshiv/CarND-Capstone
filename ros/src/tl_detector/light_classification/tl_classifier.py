@@ -5,6 +5,7 @@ import cv2
 import sys
 import tarfile
 import os
+from PIL import Image
 
 # from object_detection.utils import ops as utils_ops
 
