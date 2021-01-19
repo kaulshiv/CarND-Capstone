@@ -93,8 +93,10 @@ class TLDetector(object):
 
         if state == TrafficLight.RED:
             rospy.loginfo("RED LIGHT DETECTED")
-        else:
+        elif state == TrafficLight.GREEN:
             rospy.loginfo("GREEN LIGHT DETECTED")
+        else:
+            rospy.loginfo("NO LIGHT DETECTED")
 
         statedict = {TrafficLight.UNKNOWN:"UNKNOWN", TrafficLight.RED: "RED", TrafficLight.GREEN:"GREEN", TrafficLight.YELLOW:"YELLOW"}
         # rospy.loginfo("LIGHT STATE: " + str(statedict[state]))
