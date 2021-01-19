@@ -22,6 +22,7 @@ class TLClassifier(object):
         self.model = None
         self.input_image = None
         self.light_prediction = None
+        self.counter = 0
 
         self.load_model()
 
@@ -132,6 +133,10 @@ class TLClassifier(object):
         if(num_red_pixels<num_green_pixels and num_green_pixels>self.input_image.size*0.2):
             self.light_prediction = TrafficLight.GREEN
         self.light_prediction = TrafficLight.RED
+
+        final_img = Image.fromarray(img_rgb)
+        final_img.save(str(self.light_prediction)+"_" + str(self.counter))
+        self.counter+=1
 
     def get_crop(self, bbox):
         h, w, _ = self.input_image.shape
