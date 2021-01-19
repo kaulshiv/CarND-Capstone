@@ -36,7 +36,6 @@ class TLClassifier(object):
 
         model_dir = os.path.join(model_dir, "saved_model")
         self.model = tf.saved_model.load(str(model_dir))
-        rospy.loginfo("LOADED MODEL")
 
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
